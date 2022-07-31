@@ -118,8 +118,6 @@ afterEvaluate { project ->
 
         TransformTask transformTask = project.tasks.findByName("transformClassesWithDexBuilderFor" + variant.name.capitalize())
         Collection consumedInputStreams = transformTask.consumedInputStreams
-//        ApplicationVariantImpl impl = (ApplicationVariantImpl)variant;
-//        impl.getVariantData().scope.transformManager.addStream( //OriginalStream.builder(project, "spi-classes")
         consumedInputStreams.add(
             OriginalStream.builder(project, "spi-javac-output")
                 .addContentTypes(QualifiedContent.DefaultContentType.CLASSES, QualifiedContent.DefaultContentType.RESOURCES)
