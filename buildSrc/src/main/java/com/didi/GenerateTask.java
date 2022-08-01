@@ -17,32 +17,35 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class GenerateTask extends DefaultTask {
-    private FileCollection inputFiles;
+//    private FileCollection inputFiles;
+//
+//    private File outputFile;
+//
+//    @InputFiles
+//    @PathSensitive(PathSensitivity.RELATIVE)
+//    @SkipWhenEmpty
+//    public FileCollection getInputFiles() {
+//        return inputFiles;
+//    }
+//
+//    public void setInputFiles(FileCollection inputFiles) {
+//        this.inputFiles = inputFiles;
+//    }
+//
+//    @OutputFile
+//    public File getOutputFile() {
+//        return outputFile;
+//    }
+//
+//    public void setOutputFile(File outputFile) {
+//        this.outputFile = outputFile;
+//    }
 
-    private File outputFile;
-
-    @InputFiles
-    @PathSensitive(PathSensitivity.RELATIVE)
-    @SkipWhenEmpty
-    public FileCollection getInputFiles() {
-        return inputFiles;
-    }
-
-    public void setInputFiles(FileCollection inputFiles) {
-        this.inputFiles = inputFiles;
-    }
-
-    @OutputFile
-    public File getOutputFile() {
-        return outputFile;
-    }
-
-    public void setOutputFile(File outputFile) {
-        this.outputFile = outputFile;
-    }
-
-    @TaskAction
-    public void generate() throws IOException {
+    public static void generate(FileCollection inputFiles, File outputFile) throws IOException {
+//    }
+//
+//    @TaskAction
+//    public void generate() throws IOException {
         outputFile.getParentFile().mkdirs();
 
         List<String> statements = inputFiles.getFiles().stream()

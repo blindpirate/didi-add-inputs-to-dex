@@ -1,8 +1,5 @@
-import com.android.build.api.transform.QualifiedContent
-import com.android.build.gradle.internal.api.ApplicationVariantImpl
-import com.android.build.gradle.internal.pipeline.OriginalStream
-import com.android.build.gradle.internal.pipeline.TransformTask
 import com.didi.GenerateTask
+import com.didi.MyPlugin
 
 /*
  * Copyright 2017, The Android Open Source Project
@@ -102,31 +99,36 @@ dependencies {
 afterEvaluate { project ->
     android.applicationVariants.each { variant ->
         File generateSourceDir = new File(variant.javaCompile.getDestinationDir().parentFile, "spi-source")
-        File generatedClassDir = new File(variant.javaCompile.getDestinationDir().parentFile, "spi-classes")
-        Task generateTask = project.tasks.create("generateServiceRegistryFor${variant.name.capitalize()}", GenerateTask.class) { GenerateTask task ->
-            task.inputFiles = project.fileTree(variant.javaCompile.destinationDir)
-            task.outputFile = new File(generateSourceDir, "com/didi/ServiceRegistry.java")
+
+        project.tasks.getByName("compile${variant.name.capitalize()}JavaWithJavac").doLast {
+            GenerateTask.generate(project.fileTree(variant.javaCompile.destinationDir), new File(generateSourceDir, "com/didi/ServiceRegistry.java"))
+            MyPlugin.compile(project, project.files(generateSourceDir), variant.javaCompile.destinationDir, classpath + project.files(destinationDir))
         }
+//        File generatedClassDir = new File(variant.javaCompile.getDestinationDir().parentFile, "spi-classes")
+//        Task generateTask = project.tasks.create("generateServiceRegistryFor${variant.name.capitalize()}", GenerateTask.class) { GenerateTask task ->
+//            task.inputFiles = project.fileTree(variant.javaCompile.destinationDir)
+//            task.outputFile = new File(generateSourceDir, "com/didi/ServiceRegistry.java")
+//        }
+//
+//        Task compileTask = project.tasks.create("compileServiceRegistryFor${variant.name.capitalize()}", JavaCompile.class) { JavaCompile compileTask ->
+//            JavaCompile javac = (JavaCompile) project.tasks.getByName("compile${variant.name.capitalize()}JavaWithJavac")
+//            compileTask.classpath = javac.classpath + project.files(variant.javaCompile.destinationDir)
+//            compileTask.source(project.files(generateSourceDir))
+//            compileTask.destinationDir(generatedClassDir)
+//            dependsOn(generateTask)
+//        }
 
-        Task compileTask = project.tasks.create("compileServiceRegistryFor${variant.name.capitalize()}", JavaCompile.class) { JavaCompile compileTask ->
-            JavaCompile javac = (JavaCompile) project.tasks.getByName("compile${variant.name.capitalize()}JavaWithJavac")
-            compileTask.classpath = javac.classpath + project.files(variant.javaCompile.destinationDir)
-            compileTask.source(project.files(generateSourceDir))
-            compileTask.destinationDir(generatedClassDir)
-            dependsOn(generateTask)
-        }
-
-        TransformTask transformTask = project.tasks.findByName("transformClassesWithDexBuilderFor" + variant.name.capitalize())
-        Collection consumedInputStreams = transformTask.consumedInputStreams
-        consumedInputStreams.add(
-            OriginalStream.builder(project, "spi-javac-output")
-                .addContentTypes(QualifiedContent.DefaultContentType.CLASSES, QualifiedContent.DefaultContentType.RESOURCES)
-                .addScope(QualifiedContent.Scope.PROJECT)
-                .setFileCollection(project.files(generatedClassDir))
-                .build()
-        )
-
-        project.tasks.getByName("assemble" + variant.name.capitalize()).dependsOn(compileTask)
+//        TransformTask transformTask = project.tasks.findByName("transformClassesWithDexBuilderFor" + variant.name.capitalize())
+//        Collection consumedInputStreams = transformTask.consumedInputStreams
+//        consumedInputStreams.add(
+//            OriginalStream.builder(project, "spi-javac-output")
+//                .addContentTypes(QualifiedContent.DefaultContentType.CLASSES, QualifiedContent.DefaultContentType.RESOURCES)
+//                .addScope(QualifiedContent.Scope.PROJECT)
+//                .setFileCollection(project.files(generatedClassDir))
+//                .build()
+//        )
+//
+//        project.tasks.getByName("assemble" + variant.name.capitalize()).dependsOn(compileTask)
     }
 }
 
